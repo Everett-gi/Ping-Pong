@@ -1,20 +1,175 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">  
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ping-Pong</title>
-        <style>
-            *{
-                overflow: hidden;
-                margin: 0;
-                padding: 0;
-            }
-        </style>
-    </head>
-    <body>
-        <canvas></canvas>
-        <script src="script.js"></script>
-    </body>
+<html lang="pt-BR" data-theme="retro" data-crt="on" data-screen="main">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Pong clássico em HTML5 Canvas, com menu completo, dificuldades e recordes.">
+    <meta name="theme-color" content="#000000">
+    <title>PONG</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Crect x='3' y='9' width='4' height='14' fill='%23fff'/%3E%3Crect x='25' y='6' width='4' height='14' fill='%23fff'/%3E%3Crect x='14' y='14' width='5' height='5' fill='%23fff'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="game" role="img" aria-label="Mesa de Pong"></canvas>
+
+    <div class="crt" aria-hidden="true"></div>
+
+    <button id="pause-btn" class="pause-btn" type="button" aria-label="Pausar jogo">II</button>
+
+    <p id="announcer" class="sr-only" role="status" aria-live="polite"></p>
+
+    <div id="overlay" class="overlay">
+
+        <!-- ================= MENU PRINCIPAL ================= -->
+        <section class="screen screen--main" data-screen-id="main" aria-label="Menu principal">
+            <header class="brand">
+                <h1 class="brand__title">PONG</h1>
+                <p class="brand__sub">— 1972 —</p>
+            </header>
+            <nav class="menu">
+                <button class="btn" type="button" data-row data-action="goto" data-target="play">JOGAR</button>
+                <button class="btn" type="button" data-row data-action="goto" data-target="options">OPÇÕES</button>
+                <button class="btn" type="button" data-row data-action="goto" data-target="records">RECORDES</button>
+                <button class="btn" type="button" data-row data-action="goto" data-target="help">COMO JOGAR</button>
+            </nav>
+            <p class="hint"><span>SETAS</span> NAVEGAM &middot; <span>ENTER</span> SELECIONA</p>
+        </section>
+
+        <!-- ================= NOVO JOGO ================= -->
+        <section class="screen" data-screen-id="play" aria-label="Novo jogo">
+            <h2 class="screen__title">NOVO JOGO</h2>
+            <div class="panel">
+                <div class="option" data-row data-setting="mode" role="radiogroup" aria-labelledby="lbl-mode">
+                    <span class="option__label" id="lbl-mode">MODO</span>
+                    <div class="segmented">
+                        <button type="button" role="radio" data-value="cpu">1P VS CPU</button>
+                        <button type="button" role="radio" data-value="duo">2 JOGADORES</button>
+                    </div>
+                </div>
+                <div class="option" data-row data-setting="difficulty" role="radiogroup" aria-labelledby="lbl-diff">
+                    <span class="option__label" id="lbl-diff">DIFICULDADE</span>
+                    <div class="segmented">
+                        <button type="button" role="radio" data-value="easy">FÁCIL</button>
+                        <button type="button" role="radio" data-value="normal">NORMAL</button>
+                        <button type="button" role="radio" data-value="hard">DIFÍCIL</button>
+                    </div>
+                </div>
+                <div class="option" data-row data-setting="target" role="radiogroup" aria-labelledby="lbl-target">
+                    <span class="option__label" id="lbl-target">VENCE COM</span>
+                    <div class="segmented">
+                        <button type="button" role="radio" data-value="5">5 PTS</button>
+                        <button type="button" role="radio" data-value="7">7 PTS</button>
+                        <button type="button" role="radio" data-value="11">11 PTS</button>
+                    </div>
+                </div>
+            </div>
+            <div class="menu">
+                <button class="btn btn--primary" type="button" data-row data-action="start">INICIAR</button>
+                <button class="btn" type="button" data-row data-action="back">VOLTAR</button>
+            </div>
+            <p class="hint"><span>ESQ/DIR</span> ALTERA &middot; <span>ESC</span> VOLTA</p>
+        </section>
+
+        <!-- ================= OPÇÕES ================= -->
+        <section class="screen" data-screen-id="options" aria-label="Opções">
+            <h2 class="screen__title">OPÇÕES</h2>
+            <div class="panel">
+                <div class="option" data-row data-setting="theme" role="radiogroup" aria-labelledby="lbl-theme">
+                    <span class="option__label" id="lbl-theme">TEMA</span>
+                    <div class="segmented">
+                        <button type="button" role="radio" data-value="retro">RETRÔ</button>
+                        <button type="button" role="radio" data-value="classic">CLÁSSICO</button>
+                        <button type="button" role="radio" data-value="neon">NEON</button>
+                    </div>
+                </div>
+                <div class="option" data-row data-setting="sound" role="radiogroup" aria-labelledby="lbl-sound">
+                    <span class="option__label" id="lbl-sound">SOM</span>
+                    <div class="segmented">
+                        <button type="button" role="radio" data-value="on">LIGADO</button>
+                        <button type="button" role="radio" data-value="off">DESLIGADO</button>
+                    </div>
+                </div>
+                <div class="option" data-row data-setting="crt" role="radiogroup" aria-labelledby="lbl-crt">
+                    <span class="option__label" id="lbl-crt">EFEITO CRT</span>
+                    <div class="segmented">
+                        <button type="button" role="radio" data-value="on">LIGADO</button>
+                        <button type="button" role="radio" data-value="off">DESLIGADO</button>
+                    </div>
+                </div>
+            </div>
+            <div class="menu">
+                <button class="btn" type="button" data-row data-action="back">VOLTAR</button>
+            </div>
+            <p class="hint"><span>ESQ/DIR</span> ALTERA &middot; <span>ESC</span> VOLTA</p>
+        </section>
+
+        <!-- ================= RECORDES ================= -->
+        <section class="screen" data-screen-id="records" aria-label="Recordes">
+            <h2 class="screen__title">RECORDES</h2>
+            <div class="panel">
+                <dl class="stats">
+                    <div class="stat"><dt>PARTIDAS</dt><dd data-stat="matches">0</dd></div>
+                    <div class="stat"><dt>VITÓRIAS</dt><dd data-stat="wins">0</dd></div>
+                    <div class="stat"><dt>DERROTAS</dt><dd data-stat="losses">0</dd></div>
+                    <div class="stat"><dt>APROVEITAMENTO</dt><dd data-stat="winrate">0%</dd></div>
+                    <div class="stat"><dt>MAIOR SEQUÊNCIA DE REBATIDAS</dt><dd data-stat="bestRally">0</dd></div>
+                    <div class="stat"><dt>MAIOR SÉRIE DE VITÓRIAS</dt><dd data-stat="bestStreak">0</dd></div>
+                    <div class="stat"><dt>PONTOS FEITOS</dt><dd data-stat="pointsFor">0</dd></div>
+                    <div class="stat"><dt>PONTOS SOFRIDOS</dt><dd data-stat="pointsAgainst">0</dd></div>
+                </dl>
+                <p class="stats__note">VITÓRIAS POR NÍVEL &middot; <span data-stat="byDifficulty">F 0 / N 0 / D 0</span></p>
+            </div>
+            <div class="menu">
+                <button class="btn btn--danger" type="button" data-row data-action="reset-records">LIMPAR RECORDES</button>
+                <button class="btn" type="button" data-row data-action="back">VOLTAR</button>
+            </div>
+            <p class="hint">PARTIDAS DE 2 JOGADORES NÃO CONTAM VITÓRIAS</p>
+        </section>
+
+        <!-- ================= COMO JOGAR ================= -->
+        <section class="screen" data-screen-id="help" aria-label="Como jogar">
+            <h2 class="screen__title">COMO JOGAR</h2>
+            <div class="panel">
+                <dl class="stats stats--wide">
+                    <div class="stat"><dt>JOGADOR 1</dt><dd>MOUSE / TOQUE OU W E S</dd></div>
+                    <div class="stat"><dt>JOGADOR 2</dt><dd>SETAS CIMA E BAIXO</dd></div>
+                    <div class="stat"><dt>PAUSAR</dt><dd>ESC OU P</dd></div>
+                    <div class="stat"><dt>NO MENU</dt><dd>CIMA/BAIXO NAVEGAM &middot; ESQ/DIR ALTERAM</dd></div>
+                </dl>
+                <p class="stats__note">A BOLA ACELERA A CADA REBATIDA. QUEM CHEGAR PRIMEIRO À PONTUAÇÃO ALVO VENCE.</p>
+            </div>
+            <div class="menu">
+                <button class="btn" type="button" data-row data-action="back">VOLTAR</button>
+            </div>
+        </section>
+
+        <!-- ================= PAUSA ================= -->
+        <section class="screen" data-screen-id="pause" aria-label="Jogo pausado">
+            <h2 class="screen__title screen__title--blink">PAUSADO</h2>
+            <div class="menu">
+                <button class="btn btn--primary" type="button" data-row data-action="resume">CONTINUAR</button>
+                <button class="btn" type="button" data-row data-action="restart">REINICIAR</button>
+                <button class="btn" type="button" data-row data-action="goto" data-target="options">OPÇÕES</button>
+                <button class="btn" type="button" data-row data-action="quit">SAIR PARA O MENU</button>
+            </div>
+        </section>
+
+        <!-- ================= FIM DE JOGO ================= -->
+        <section class="screen" data-screen-id="over" aria-label="Fim de jogo">
+            <h2 class="screen__title" data-result-title>FIM DE JOGO</h2>
+            <p class="result__score" data-result-score>0 &ndash; 0</p>
+            <p class="result__badge" data-result-badge hidden>NOVO RECORDE!</p>
+            <div class="menu">
+                <button class="btn btn--primary" type="button" data-row data-action="rematch">REVANCHE</button>
+                <button class="btn" type="button" data-row data-action="quit">MENU PRINCIPAL</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
 </html>

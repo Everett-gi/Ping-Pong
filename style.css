@@ -1,0 +1,522 @@
+/* =========================================================
+   PONG — folha de estilo
+   Temas são aplicados via [data-theme] no <html>; o canvas lê
+   as mesmas variáveis, então cores vivem em um lugar só.
+   ========================================================= */
+
+:root {
+    --bg: #000000;
+    --fg: #ffffff;
+    --accent: #ffffff;
+    --muted: #8a8a8a;
+    --danger: #ff5a5a;
+    --panel-border: 3px;
+    --font: "Press Start 2P", "Courier New", ui-monospace, monospace;
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+html[data-theme="classic"] {
+    --bg: #670010;
+    --fg: #ffffff;
+    --accent: #ffd7d7;
+    --muted: #c78f95;
+    --danger: #ffb3b3;
+}
+
+html[data-theme="neon"] {
+    --bg: #05070f;
+    --fg: #e8faff;
+    --accent: #00e5ff;
+    --muted: #5b7f92;
+    --danger: #ff3d81;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+    -webkit-font-smoothing: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.35s var(--ease);
+}
+
+body {
+    /* Evita que o arraste no canvas role a página no celular. */
+    overscroll-behavior: none;
+}
+
+#game {
+    position: fixed;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---------------------- efeito CRT ---------------------- */
+
+.crt {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease);
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.16) 0px,
+            rgba(0, 0, 0, 0.16) 1px,
+            transparent 1px,
+            transparent 3px
+        ),
+        radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+html[data-crt="on"] .crt {
+    opacity: 1;
+}
+
+/* ---------------------- overlay / telas ---------------------- */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    opacity: 1;
+    transition: opacity 0.25s var(--ease);
+}
+
+@supports not (background: color-mix(in srgb, red 50%, blue)) {
+    .overlay { background: rgba(0, 0, 0, 0.88); }
+}
+
+html[data-screen="none"] .overlay {
+    opacity: 0;
+    /* visibility (com atraso) é o fallback para navegadores sem `inert`:
+       impede que os botões escondidos continuem recebendo TAB. */
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s var(--ease), visibility 0s linear 0.25s;
+}
+
+.screen {
+    display: none;
+    width: min(560px, 100%);
+    max-height: 100%;
+    overflow-y: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: clamp(14px, 3.2vh, 26px);
+    text-align: center;
+    animation: screen-in 0.26s var(--ease) both;
+}
+
+html[data-screen="main"] .screen[data-screen-id="main"],
+html[data-screen="play"] .screen[data-screen-id="play"],
+html[data-screen="options"] .screen[data-screen-id="options"],
+html[data-screen="records"] .screen[data-screen-id="records"],
+html[data-screen="help"] .screen[data-screen-id="help"],
+html[data-screen="pause"] .screen[data-screen-id="pause"],
+html[data-screen="over"] .screen[data-screen-id="over"] {
+    display: flex;
+}
+
+@keyframes screen-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* ---------------------- tipografia ---------------------- */
+
+.brand {
+    display: grid;
+    gap: 14px;
+    margin-bottom: clamp(4px, 2vh, 18px);
+}
+
+.brand__title {
+    font-size: clamp(38px, 12vw, 76px);
+    letter-spacing: clamp(4px, 2vw, 14px);
+    line-height: 1.1;
+    text-indent: clamp(4px, 2vw, 14px); /* compensa o letter-spacing final */
+    color: var(--fg);
+}
+
+html[data-theme="neon"] .brand__title {
+    text-shadow: 0 0 12px var(--accent), 0 0 34px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.brand__sub,
+.hint,
+.stats__note {
+    font-size: clamp(8px, 2.2vw, 11px);
+    letter-spacing: 2px;
+    line-height: 1.9;
+    color: var(--muted);
+}
+
+.hint span {
+    color: var(--fg);
+}
+
+.screen__title {
+    font-size: clamp(16px, 5vw, 26px);
+    letter-spacing: clamp(2px, 1vw, 6px);
+    line-height: 1.4;
+}
+
+.screen__title--blink {
+    animation: blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+    to { opacity: 0.25; }
+}
+
+/* ---------------------- painel ---------------------- */
+
+.panel {
+    display: grid;
+    gap: clamp(10px, 2vh, 18px);
+    padding: clamp(14px, 3vw, 24px);
+    border: var(--panel-border) solid var(--fg);
+    text-align: left;
+}
+
+html[data-theme="neon"] .panel {
+    border-color: var(--accent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* ---------------------- botões ---------------------- */
+
+.menu {
+    display: grid;
+    gap: clamp(8px, 1.6vh, 14px);
+}
+
+.btn {
+    position: relative;
+    padding: clamp(12px, 2.4vh, 17px) 18px clamp(12px, 2.4vh, 17px) 40px;
+    font: inherit;
+    font-size: clamp(10px, 2.8vw, 14px);
+    letter-spacing: 2px;
+    text-align: left;
+    color: var(--fg);
+    background: transparent;
+    border: var(--panel-border) solid var(--fg);
+    cursor: pointer;
+    transition: background-color 0.14s var(--ease), color 0.14s var(--ease), transform 0.14s var(--ease);
+}
+
+.btn::before {
+    /* ">" em vez de "\25B6": a Press Start 2P não traz glifos de seta/triângulo,
+       e o fallback por glifo quebraria a unidade tipográfica da tela. */
+    content: ">";
+    position: absolute;
+    left: 16px;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.14s var(--ease), transform 0.14s var(--ease);
+}
+
+.btn:hover,
+.btn:focus-visible {
+    background: var(--fg);
+    color: var(--bg);
+    outline: none;
+}
+
+.btn:hover::before,
+.btn:focus-visible::before {
+    opacity: 1;
+    transform: none;
+}
+
+.btn:active {
+    transform: translateY(2px);
+}
+
+.btn--primary {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+html[data-theme="neon"] .btn--primary,
+html[data-theme="neon"] .btn:hover,
+html[data-theme="neon"] .btn:focus-visible {
+    background: var(--accent);
+    color: #04121a;
+    box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.btn--danger {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.btn--danger:hover,
+.btn--danger:focus-visible {
+    background: var(--danger);
+    color: var(--bg);
+}
+
+/* ---------------------- opções (radiogroup) ---------------------- */
+
+.option {
+    display: grid;
+    gap: 10px;
+}
+
+.option[hidden] {
+    display: none;
+}
+
+.option__label {
+    font-size: clamp(8px, 2.2vw, 11px);
+    letter-spacing: 2px;
+    color: var(--muted);
+}
+
+.segmented {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.segmented button {
+    flex: 1 1 auto;
+    padding: 11px 8px;
+    font: inherit;
+    font-size: clamp(8px, 2.2vw, 11px);
+    letter-spacing: 1px;
+    color: var(--muted);
+    background: transparent;
+    border: 2px solid var(--muted);
+    cursor: pointer;
+    transition: background-color 0.14s var(--ease), color 0.14s var(--ease), border-color 0.14s var(--ease);
+}
+
+.segmented button:hover {
+    color: var(--fg);
+    border-color: var(--fg);
+}
+
+.segmented button[aria-checked="true"] {
+    color: var(--bg);
+    background: var(--fg);
+    border-color: var(--fg);
+}
+
+html[data-theme="neon"] .segmented button[aria-checked="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #04121a;
+}
+
+.option:focus-within .option__label {
+    color: var(--fg);
+}
+
+.segmented button:focus-visible {
+    outline: 2px dashed var(--accent);
+    outline-offset: 3px;
+}
+
+/* ---------------------- estatísticas ---------------------- */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(10px, 2vh, 16px) 14px;
+}
+
+.stats--wide {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.stat {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.stat dt {
+    font-size: clamp(7px, 1.9vw, 9px);
+    letter-spacing: 1px;
+    line-height: 1.7;
+    color: var(--muted);
+}
+
+.stat dd {
+    font-size: clamp(11px, 3vw, 16px);
+    letter-spacing: 1px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.stats--wide .stat dd {
+    font-size: clamp(8px, 2.2vw, 11px);
+    color: var(--fg);
+}
+
+.stats__note {
+    text-align: center;
+}
+
+/* ---------------------- resultado ---------------------- */
+
+.result__score {
+    font-size: clamp(30px, 11vw, 62px);
+    letter-spacing: clamp(4px, 2vw, 10px);
+}
+
+.result__badge {
+    font-size: clamp(8px, 2.2vw, 11px);
+    letter-spacing: 2px;
+    line-height: 1.9;
+    color: var(--accent);
+    animation: blink 0.9s steps(2, start) infinite;
+}
+
+.result__badge[hidden] {
+    display: none;
+}
+
+/* ---------------------- botão de pausa (toque) ---------------------- */
+
+.pause-btn {
+    position: fixed;
+    z-index: 4;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    width: 46px;
+    height: 46px;
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--fg);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    border: 2px solid var(--fg);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease);
+}
+
+html[data-screen="none"] .pause-btn {
+    opacity: 0.55;
+    pointer-events: auto;
+}
+
+.pause-btn:hover,
+.pause-btn:focus-visible {
+    opacity: 1;
+}
+
+/* ---------------------- responsivo / acessibilidade ---------------------- */
+
+@media (max-width: 420px) {
+    .stats {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .segmented button {
+        flex: 1 1 100%;
+    }
+}
+
+/* Telas baixas (celular deitado): o menu inteiro precisa caber sem rolagem,
+   então o rótulo da opção vai para o lado dos botões em vez de acima. */
+@media (max-height: 520px) and (min-width: 480px) {
+    .screen {
+        gap: 8px;
+    }
+    .brand {
+        gap: 6px;
+        margin-bottom: 0;
+    }
+    .brand__title {
+        font-size: clamp(24px, 9vh, 44px);
+    }
+    .screen__title {
+        font-size: clamp(13px, 4vh, 20px);
+    }
+    .panel {
+        gap: 8px;
+        padding: 12px;
+    }
+    .option {
+        grid-template-columns: minmax(88px, 0.75fr) 2.25fr;
+        align-items: center;
+        gap: 12px;
+    }
+    .segmented button {
+        padding: 8px 6px;
+    }
+    .btn {
+        padding: 9px 14px 9px 32px;
+    }
+    .stats {
+        gap: 8px 14px;
+    }
+    .result__score {
+        font-size: clamp(24px, 9vh, 44px);
+    }
+}
+
+@media (max-height: 430px) and (max-width: 479px) {
+    .brand__title {
+        font-size: clamp(24px, 8vh, 38px);
+    }
+    .screen {
+        gap: 8px;
+    }
+    .btn {
+        padding: 9px 14px 9px 32px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
